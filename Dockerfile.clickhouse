@@ -1,0 +1,16 @@
+FROM clickhouse/clickhouse-server:25.8
+
+USER root
+
+# Copy ClickHouse custom config and entrypoint scripts
+COPY base/clickhouse-config/config.d/config.xml /etc/clickhouse-server/config.d/config.xml
+COPY base/clickhouse-config/entrypoint-wrapper.sh /entrypoint-wrapper.sh
+COPY base/clickhouse-config/setup/ /docker-entrypoint-initdb.d/
+COPY base/derive.sh /derive.sh
+
+RUN chmod +x /entrypoint-wrapper.sh /derive.sh
+
+# Run as the clickhouse user (UID 101) as in the original compose
+USER 101:101
+
+ENTRYPOINT ["/bin/sh", "/entrypoint-wrapper.sh"]
