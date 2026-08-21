@@ -4,12 +4,11 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 3 * * *'          # Daily at 03:00 UTC
-  workflow_dispatch:              # Manual trigger
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}/betterlytics-custom
 
 jobs:
   build-and-push:
@@ -21,6 +20,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set lowercase owner
+        id: lowercase
+        run: echo "owner=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -40,7 +43,7 @@ jobs:
           file: Dockerfile.app
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-selfhost:latest
+            ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.owner }}/betterlytics-custom-selfhost:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -51,7 +54,7 @@ jobs:
           file: Dockerfile.postgres
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-postgres:latest
+            ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.owner }}/betterlytics-custom-postgres:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -62,6 +65,6 @@ jobs:
           file: Dockerfile.clickhouse
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-clickhouse:latest
+            ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.owner }}/betterlytics-custom-clickhouse:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
