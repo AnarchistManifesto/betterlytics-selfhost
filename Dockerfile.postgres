@@ -1,0 +1,11 @@
+FROM postgres:17.5
+
+# Copy the custom entrypoint wrapper and derivation script
+COPY base/postgres-config/entrypoint-wrapper.sh /entrypoint-wrapper.sh
+COPY base/derive.sh /derive.sh
+
+# Make scripts executable
+RUN chmod +x /entrypoint-wrapper.sh /derive.sh
+
+# Override the default entrypoint
+ENTRYPOINT ["/bin/bash", "/entrypoint-wrapper.sh"]
